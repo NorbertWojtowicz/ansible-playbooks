@@ -1,0 +1,196 @@
+- name: Create Airflow user
+  ansible.builtin.user:
+    name: "{{ rv_airflow_owner }}"
+    shell: "/bin/false"
+    create_home: false
+  run_once: yes
+
+- name: Create airflow home directory
+  ansible.builtin.file:
+    path: "{{ rv_airflow_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create airflow dags directory
+  ansible.builtin.file:
+    path: "{{ rv_airflow_dags_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    
+- name: Create airflow config directory
+  ansible.builtin.file:
+    path: "{{ rv_airflow_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Set Airflow home directory ownership
+  ansible.builtin.file:
+    path: "{{ rv_airflow_home }}"
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    recurse: yes
+
+- name: Create airflow security config directory 
+  ansible.builtin.file:
+    path: "{{ rv_airflow_security_config_dir }}"
+    state: directory
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    mode: '0700'
+    
+- name: Create Airflow logs directory
+  ansible.builtin.file:
+    path: "{{ rv_airflow_log_dir }}"
+    state: directory
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    mode: '0777'
+
+- name: Create airflow webserver pid directory 
+  ansible.builtin.file:
+    path: "{{ rv_airflow_pid_dir }}"
+    state: directory
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    mode: '0700'
+
+- name: Set Airflow config ownership
+  ansible.builtin.file:
+    path: "{{ rv_airflow_config_dir }}"
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    recurse: yes
+
+- name: "Install airflow"
+  ansible.builtin.pip:
+    name: apache-airflow
+    version: "{{ rv_airflow_version  }}"
+  environment:
+    AIRFLOW_GPL_UNIDECODE: "yes"
+
+- name: "Install airflow spark provider"
+  ansible.builtin.pip:
+    name: apache-airflow-providers-apache-spark
+    version: "{{ rv_airflow_spark_provider_version  }}"
+  environment:
+    AIRFLOW_GPL_UNIDECODE: "yes"
+
+- name: Install mysql client
+  ansible.builtin.apt:
+    name: libmysqlclient-dev
+    update_cache: yes
+
+- name: "Install airflow mysql provider"
+  ansible.builtin.pip:
+    name: apache-airflow-providers-mysql
+    version: "{{ rv_airflow_mysql_provider_version  }}"
+  environment:
+    AIRFLOW_GPL_UNIDECODE: "yes"
+
+- name: "Install airflow extra packages"
+  ansible.builtin.pip:
+    name: "{{ item }}"
+  with_items:
+    "{{ rv_airflow_extra_packages }}"
+
+- name: Create airflow.cfg from template
+  ansible.builtin.template:
+    src: "airflow.cfg.j2"
+    dest: "{{ rv_airflow_config_dir }}/airflow.cfg"
+
+- name: Create airflow.env from template
+  ansible.builtin.template:
+    src: "airflow.env.j2"
+    dest: "{{ rv_airflow_config_dir }}/airflow.env"
+
+- name: Create mysql database for airflow
+  community.mysql.mysql_db:
+    login_host: "{{ rv_mysql_host }}"
+    login_user: "{{ gv_hmsdb_user }}"
+    login_password: "{{ gv_hmsdb_password }}"
+    name: "{{ rv_airflow_mysql_db }}"
+    encoding: utf8
+    state: present
+
+- name: Create Admin user
+  ansible.builtin.shell: |
+    airflow users create --username airflow --password airflow --firstname airflow --lastname airflow --role Admin --email airflow@example.org
+  environment:
+    AIRFLOW_HOME: "{{ rv_airflow_home }}"
+    AIRFLOW_CONFIG: "{{ rv_airflow_config_dir }}/airflow.cfg"
+
+- name: Create connections for spark and spark web
+  community.mysql.mysql_query:
+    login_host: "{{ rv_mysql_host }}"
+    login_user: "{{ gv_hmsdb_user }}"
+    login_password: "{{ gv_hmsdb_password }}"
+    login_db: "{{ rv_airflow_mysql_db }}"
+    query:
+    - INSERT INTO connection VALUES (NULL, 'spark_conn', 'spark', 'spark connection', 'spark://{{ rv_spark_master_host }}', NULL, NULL, NULL, 7090, 0, 0, NULL)
+    - INSERT INTO connection VALUES (NULL, 'spark_web', 'http', 'spark web connection', 'http://{{ rv_spark_master_host }}', NULL, NULL, NULL, 8082, 0, 0, NULL)
+#  register: output
+#  failed_when:
+#    - output.msg is not regex("Duplicate entry")
+
+- name: Initialize airflow db
+  ansible.builtin.shell:
+    cmd: /usr/local/bin/airflow db init
+  environment:
+    AIRFLOW_HOME: "{{ rv_airflow_home }}"
+    AIRFLOW_CONFIG: "{{ rv_airflow_config_dir }}/airflow.cfg"
+
+- name: Set Airflow variables systemwide
+  copy:
+    content: |
+      # Set AIRFLOW environment variables
+      export AIRFLOW_HOME={{ rv_airflow_home }}
+      export AIRFLOW_CONFIG={{ rv_airflow_config_dir }}/airflow.cfg
+    dest: "/etc/profile.d/airflow-profile.sh"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Create airflow.env file
+  ansible.builtin.template:
+    src: airflow.env.j2
+    dest: "{{ rv_airflow_config_dir }}/airflow.env"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create scheduler.service file
+  ansible.builtin.template:
+    src: scheduler.service.j2
+    dest: "/etc/systemd/system/scheduler.service"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable Airflow scheduler service
+  ansible.builtin.systemd:
+    name: scheduler
+    state: started
+    enabled: yes
+  throttle: 1
+
+- name: Create webserver.service file
+  ansible.builtin.template:
+    src: webserver.service.j2
+    dest: "/etc/systemd/system/webserver.service"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable Airflow webserver service
+  ansible.builtin.systemd:
+    name: webserver
+    state: started
+    enabled: yes
+  throttle: 1
+  
