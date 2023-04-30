@@ -5,8 +5,8 @@ Wants=mysql.service
 
 [Service]
 EnvironmentFile={{ rv_airflow_config_dir }}/airflow.env
-User={{ rv_airflow_owner }}
-Group={{ rv_airflow_owner }}
+User=root  # Temporary
+Group=root # Temporary
 Type=simple
 ExecStart=airflow scheduler
 Restart=always
