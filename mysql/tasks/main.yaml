@@ -26,5 +26,14 @@
     backrefs: yes
   notify: Restart MySQL
 
+- name: Create MySQL user for Airflow
+  ansible.builtin.mysql_user:
+    name: "{{ gv_airflowdb_user }}"
+    password: "{{ gv_airflowdb_password }}"
+    host: "%"
+    priv: "airflow.*:ALL,GRANT"
+    state: present
+
+
 # TODO: Create MySQL service user
 
