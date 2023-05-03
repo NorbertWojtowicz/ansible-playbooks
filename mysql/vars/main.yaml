@@ -1,0 +1,5 @@
+---
+# vars file for mysql
+rv_mysql_port: '3306'
+rv_mysql_conf: /etc/mysql
+rv_mysql_owner: mysql
