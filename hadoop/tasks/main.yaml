@@ -1,0 +1,49 @@
+---
+# tasks file for hadoop
+- name: Create Hadoop home directory
+  ansible.builtin.file:
+    path: "{{ rv_hadoop_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download hadoop binaries
+  local_action:
+    module: ansible.builtin.get_url
+    url: "{{ rv_apache_repo }}/dist/hadoop/common/hadoop-{{ rv_hadoop_version }}/hadoop-{{ rv_hadoop_version }}.tar.gz"
+    dest: "downloads/hadoop-{{ rv_hadoop_version }}.tar.gz"
+    mode: '0644'
+  run_once: true
+  become: false
+
+- name: Unarchive Hadoop binaries
+  ansible.builtin.unarchive:
+    src: "downloads/hadoop-{{ rv_hadoop_version }}.tar.gz"
+    dest: "{{ rv_hadoop_home }}"
+    creates: "{{ rv_hadoop_home }}/hadoop-{{ rv_hadoop_version }}"
+
+- name: Set Hadoop software ownership
+  ansible.builtin.file:
+    path: "{{ rv_hadoop_home }}/hadoop-{{ rv_hadoop_version }}"
+    owner: root
+    group: root
+    recurse: yes
+
+- name: Create symlink to Hadoop latest folder
+  ansible.builtin.file:
+    src: "{{ rv_hadoop_home }}/hadoop-{{ rv_hadoop_version }}"
+    dest: "{{ rv_hadoop_home }}/hadoop-latest"
+    state: link
+    owner: root
+    group: root
+
+- name: Set Hadoop home systemwide
+  copy:
+    content: |
+      # Set HADOOP environment variables
+      HADOOP_HOME={{ rv_hadoop_home }}/hadoop-latest
+    dest: "/etc/profile.d/zz-hadoop.sh"
+    mode: 0644
+    owner: root
+    group: root
