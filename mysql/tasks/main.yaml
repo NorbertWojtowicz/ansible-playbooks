@@ -1,0 +1,39 @@
+---
+# tasks file for mysql
+- name: Install MySQL and dependencies
+  ansible.builtin.apt:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  loop:
+    - mysql-server
+    - mysql-client
+    - python3-mysqldb
+    - libmysqlclient-dev
+    - libmariadb-java
+
+- name: Start and enable mysql service
+  ansible.builtin.service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Edit bind-address in config file
+  ansible.builtin.lineinfile:
+    path: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    regexp: "^bind-address"
+    line: "bind-address = 0.0.0.0"
+    backrefs: yes
+  notify: Restart MySQL
+
+- name: Create MySQL user for Airflow
+  ansible.builtin.mysql_user:
+    name: "{{ gv_airflowdb_user }}"
+    password: "{{ gv_airflowdb_password }}"
+    host: "%"
+    priv: "airflow.*:ALL,GRANT"
+    state: present
+
+
+# TODO: Create MySQL service user
+
