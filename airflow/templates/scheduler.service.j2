@@ -1,0 +1,16 @@
+[Unit]
+Description=Airflow scheduler daemon
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+EnvironmentFile={{ rv_airflow_config_dir }}/airflow.env
+User=root  # Temporary
+Group=root # Temporary
+Type=simple
+ExecStart=airflow scheduler
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

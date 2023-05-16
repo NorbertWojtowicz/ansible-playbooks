@@ -1,0 +1,128 @@
+[core]
+# The folder where your airflow pipelines live, most likely a
+# subfolder in a code repository. This path must be absolute.
+dags_folder = {{ rv_airflow_home }}/dags
+
+# Hostname by providing a path to a callable, which will resolve the hostname.
+# The format is "package.function".
+#
+# For example, default value "airflow.utils.net.getfqdn" means that result from patched
+# version of socket.getfqdn() - see https://github.com/python/cpython/issues/49254.
+#
+# No argument should be required in the function specified.
+# If using IP address as hostname is preferred, use value ``airflow.utils.net.get_host_ip_address``
+hostname_callable = airflow.utils.net.getfqdn
+
+# Default timezone in case supplied date times are naive
+# can be utc (default), system, or any IANA timezone string (e.g. Europe/Amsterdam)
+default_timezone = utc
+
+# The executor class that airflow should use. Choices include
+# ``SequentialExecutor``, ``LocalExecutor``, ``CeleryExecutor``,  max_overflow can be set to ``-1`` to indicate no overflow limit;
+# no limit will be placed on the total number of concurrent connections. Defaults to ``10``.
+sql_alchemy_max_overflow = 10
+
+# The SqlAlchemy pool recycle is the number of seconds a connection
+# can be idle in the pool before it is invalidated. This config does
+# not apply to sqlite. If the number of DB connections is ever exceeded,
+# a lower config value will allow the system to recover faster.
+sql_alchemy_pool_recycle = 1800
+
+# Check connection at the start of each connection pool checkout.
+# Typically, this is a simple statement like "SELECT 1".
+# More information here:
+# https://docs.sqlalchemy.org/en/14/core/pooling.html#disconnect-handling-pessimistic
+sql_alchemy_pool_pre_ping = True
+
+# The schema to use for the metadata database.
+# SqlAlchemy supports databases with the concept of multiple schemas.
+sql_alchemy_schema =
+
+# Import path for connect args in SqlAlchemy. Defaults to an emp) to send only the metrics that
+# start with the elements of the list (e.g: "scheduler,executor,dagrun")
+statsd_allow_list =
+
+# A function that validate the StatsD stat name, apply changes to the stat name if necessary and return
+# the transformed stat name.
+#
+# The function should have the following signature:
+# def func_name(stat_name: str) -> str:
+stat_name_handler =
+
+# To enable datadog integration to send airflow metrics.
+statsd_datadog_enabled = False
+
+# List of datadog tags attached to all metrics(e.g: key1:value1,key2:value2)
+statsd_datadog_tags =
+
+# If you want to utilise your own custom StatsD client set the relevant
+# module path below.
+# Note: The module path must exist on your PYTHONPATH for Airflow to pick it up
+# statsd_custom_client_path =
+
+[secrets]
+# Full class name of secrets backend to enable (will precede env vars and metastore in search path)
+# Example: backend = airflow.providers.amazon.aws.secrets.systems_managerbringing up new ones and killing old ones.
+worker_refresh_batch_size = 1
+
+# Number of seconds to wait before refreshing a batch of workers.
+worker_refresh_interval = 6000
+
+# If set to True, Airflow will track files in plugins_folder directory. When it detects changes,
+# then reload the gunicorn.
+reload_on_plugin_change = False
+
+# Secret key used to run your flask app. It should be as random as possible. However, when running
+# more than 1 instances of webserver, make sure all of them use the same ``secret_key`` otherwise
+# one of them will error with "CSRF session token is missing".
+# The webserver key is also used to authorize requests to Celery workers when logs are retrieved.
+# The token generated using the secret key has a short expiry time though - make sure that time on
+# ALL the machines that you run airflow components on is synchronized (for example using ntpd)
+# otherwise you might get "forbidden" errors when the logs are accessed.
+secret_key = NGrF5Glow
+# smtp_user =
+# Example: smtp_password = airflow
+# smtp_password =
+smtp_port = 25
+smtp_mail_from = airflow@example.com
+smtp_timeout = 30
+smtp_retry_limit = 5
+
+[sentry]
+
+# Sentry (https://docs.sentry.io) integration. Here you can supply
+# additional configuration options based on the Python platform. See:
+# https://docs.sentry.io/error-reporting/configuration/?platform=python.
+# Unsupported options: ``integrations``, ``in_app_include``, ``in_app_exclude``,
+# ``ignore_errors``, ``before_breadcrumb``, ``transport``.
+# Enable error reporting to Sentry
+sentry_on = false
+sentry_dsn =
+
+# Dotted path to a before_send function that the sentry SDK should be configured to use.
+# before_send =
+
+[local_kubernetes_executor]
+
+# This section only applies if you are using the ``LocalKubernetesExecutor`` in
+# ``[core]`` section above
+# Define when to send a task to ``KubernetesExecutor`` when using ``LocalKubernetesExecutor``.
+# When the queue of a task isonnection to _f
+# from_email =
+
+[smtp] e = kubernets if you are using tn using ``Cworkers with the
+# ``airflowote_control = tdis:/iit e scheduler to update the#hen you start a schedny seconds, the sloop_to_schedui scheduler"d time of the files. This is usefulltiple ne in DAG
+allow_ggerer will run at once, by defauloken, usef Trog_idoffset
+
+[elasticsearhe Kubernetes ner  rformance.unch pods in multiple  the default cluster_che .com/kubernetes-client/python/blowargs = {"ables TCP rvice = True
+
+# Whs.
+tcp_keeod used in orderng out as for each om class that:ilyfaul The encodi the maximum size of allowed indet this to True if yon Defauation/produd.
+google_key_d start witserver-side encryption fple: logging_config_class = my.pain web server to cons]
+
+#retspreflight request to indicate which HTTP
+# headers cang geveH_GEVENT" environment variable to "1" tker_class = sync
+%Forwarded-Port``
+proxy_fix_x_port = 1
+
+# Number ofymous user activity to # when

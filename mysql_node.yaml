@@ -5,7 +5,4 @@
 
   tasks:
     - include_role:
-        name: baseos
-
-    - include_role:
         name: mysql

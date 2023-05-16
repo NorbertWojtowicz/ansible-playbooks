@@ -1,0 +1,17 @@
+rv_airflow_owner: airflow
+rv_airflow_mysql_db: airflow
+rv_airflow_home: /opt/apache/airflow
+rv_airflow_config_dir: /etc/airflow
+rv_airflow_dags_dir: "{{ rv_airflow_home }}/dags"
+rv_airflow_webserver_user: airflow
+rv_airflow_webserver_pass: airflow
+rv_airflow_security_config_dir: "{{ rv_airflow_config_dir }}/security"
+rv_airflow_pid_dir: "/run/airflow"
+rv_airflow_log_dir: /var/log/airflow
+rv_airflow_metrics_port: 8125
+rv_airflow_webserver_port: 8080
+rv_airflow_extra_packages:
+  - "pandas"
+  - "kubernetes"
+rv_airflow_spark_provider_version: 4.0.1
+rv_airflow_mysql_provider_version: 4.0.1
