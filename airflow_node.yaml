@@ -5,8 +5,11 @@
 
   tasks:
     - include_role:
+        name: os-setup
+        
+    - include_role:
         name: airflow
       vars:
         rv_airflow_version: "{{ gv_airflow_version }}"
-        rv_mysql_host: "{{ groups.mysl | first }}"
+        rv_mysql_host: "{{ groups.mysql | first }}"
         rv_spark_master_host: "{{ groups.sparkmaster | first }}"

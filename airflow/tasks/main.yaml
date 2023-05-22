@@ -112,11 +112,18 @@
 - name: Create mysql database for airflow
   community.mysql.mysql_db:
     login_host: "{{ rv_mysql_host }}"
-    login_user: "{{ gv_hmsdb_user }}"
-    login_password: "{{ gv_hmsdb_password }}"
+    login_user: "{{ gv_airflowdb_user }}"
+    login_password: "{{ gv_airflowdb_password }}"
     name: "{{ rv_airflow_mysql_db }}"
     encoding: utf8
     state: present
+
+- name: Initialize airflow db
+  ansible.builtin.shell:
+    cmd: /usr/local/bin/airflow db init
+  environment:
+    AIRFLOW_HOME: "{{ rv_airflow_home }}"
+    AIRFLOW_CONFIG: "{{ rv_airflow_config_dir }}/airflow.cfg"
 
 - name: Create Admin user
   ansible.builtin.shell: |
@@ -128,22 +135,12 @@
 - name: Create connections for spark and spark web
   community.mysql.mysql_query:
     login_host: "{{ rv_mysql_host }}"
-    login_user: "{{ gv_hmsdb_user }}"
-    login_password: "{{ gv_hmsdb_password }}"
+    login_user: "{{ gv_airflowdb_user }}"
+    login_password: "{{ gv_airflowdb_password }}"
     login_db: "{{ rv_airflow_mysql_db }}"
     query:
     - INSERT INTO connection VALUES (NULL, 'spark_conn', 'spark', 'spark connection', 'spark://{{ rv_spark_master_host }}', NULL, NULL, NULL, 7090, 0, 0, NULL)
     - INSERT INTO connection VALUES (NULL, 'spark_web', 'http', 'spark web connection', 'http://{{ rv_spark_master_host }}', NULL, NULL, NULL, 8082, 0, 0, NULL)
-#  register: output
-#  failed_when:
-#    - output.msg is not regex("Duplicate entry")
-
-- name: Initialize airflow db
-  ansible.builtin.shell:
-    cmd: /usr/local/bin/airflow db init
-  environment:
-    AIRFLOW_HOME: "{{ rv_airflow_home }}"
-    AIRFLOW_CONFIG: "{{ rv_airflow_config_dir }}/airflow.cfg"
 
 - name: Set Airflow variables systemwide
   copy:
