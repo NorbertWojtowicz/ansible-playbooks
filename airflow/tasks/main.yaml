@@ -13,6 +13,14 @@
     group: root
     mode: '0755'
 
+- name: Create airflow log and scheduler directory
+  ansible.builtin.file:
+    path: "{{ rv_airflow_log_dir }}/scheduler"
+    state: directory
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    mode: '0755'
+
 - name: Create airflow dags directory
   ansible.builtin.file:
     path: "{{ rv_airflow_dags_dir }}"
@@ -51,14 +59,6 @@
     owner: "{{ rv_airflow_owner }}"
     group: "{{ rv_airflow_owner }}"
     mode: '0777'
-
-- name: Create airflow webserver pid directory 
-  ansible.builtin.file:
-    path: "{{ rv_airflow_pid_dir }}"
-    state: directory
-    owner: "{{ rv_airflow_owner }}"
-    group: "{{ rv_airflow_owner }}"
-    mode: '0700'
 
 - name: Set Airflow config ownership
   ansible.builtin.file:
@@ -139,8 +139,10 @@
     login_password: "{{ gv_airflowdb_password }}"
     login_db: "{{ rv_airflow_mysql_db }}"
     query:
-    - INSERT INTO connection VALUES (NULL, 'spark_conn', 'spark', 'spark connection', 'spark://{{ rv_spark_master_host }}', NULL, NULL, NULL, 7090, 0, 0, NULL)
-    - INSERT INTO connection VALUES (NULL, 'spark_web', 'http', 'spark web connection', 'http://{{ rv_spark_master_host }}', NULL, NULL, NULL, 8082, 0, 0, NULL)
+    - INSERT IGNORE INTO connection VALUES
+      (NULL, 'spark_conn', 'spark', 'spark connection', 'spark://{{ rv_spark_master_host }}', NULL, NULL, NULL, 7090, 0, 0, NULL)
+    - INSERT IGNORE INTO connection VALUES
+      (NULL, 'spark_web', 'http', 'spark web connection', 'http://{{ rv_spark_master_host }}', NULL, NULL, NULL, 8082, 0, 0, NULL)
 
 - name: Set Airflow variables systemwide
   copy:
@@ -174,8 +176,6 @@
     name: scheduler
     state: started
     enabled: yes
-  throttle: 1
-
 - name: Create webserver.service file
   ansible.builtin.template:
     src: webserver.service.j2
@@ -189,5 +189,4 @@
     name: webserver
     state: started
     enabled: yes
-  throttle: 1
   
