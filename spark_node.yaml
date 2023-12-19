@@ -1,0 +1,11 @@
+---
+- name: Install and configure Apache Spark
+  hosts: sparkmaster
+  become: yes
+
+  tasks:
+    - include_role:
+        name: os-setup
+        
+    - include_role:
+        name: spark

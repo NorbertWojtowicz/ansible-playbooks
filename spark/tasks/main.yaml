@@ -1,0 +1,24 @@
+- name: Download Spark software
+  local_action:
+    module: ansible.builtin.get_url
+    url: "{{ rv_spark_download_url }}/spark-{{ rv_spark_version }}-bin-hadoop3.tgz"
+    dest: "downloads/spark-{{ rv_spark_version }}-bin.tgz"
+    mode: '0644'
+  run_once: true
+  become: false
+
+- name: Create Spark home directory
+  ansible.builtin.file:
+    path: "{{ rv_spark_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create Spark config directory
+  ansible.builtin.file:
+    path: "{{ rv_spark_config }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0777'

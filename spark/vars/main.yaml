@@ -1,0 +1,4 @@
+rv_spark_home: "/opt/apache/spark"
+rv_spark_config: "/etc/spark"
+rv_spark_download_url: "https://archive.apache.org/dist/spark"
+rv_spark_version: "3.5.0"
