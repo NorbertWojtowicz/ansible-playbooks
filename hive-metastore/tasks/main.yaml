@@ -1,0 +1,173 @@
+---
+- name: Download Hive Metastore
+  local_action:
+    module: ansible.builtin.get_url
+    url: "{{ rv_apache_repo }}/dist/hive/hive-standalone-metastore-{{ rv_metastore_version }}/hive-standalone-metastore-{{ rv_metastore_version }}-bin.tar.gz"
+    dest: "downloads/hive-metastore-{{ rv_metastore_version }}-bin.tar.gz"
+    mode: '0644'
+  run_once: true
+  become: false
+  
+- name: Download Hive for hive-exec.jar
+  local_action:
+    module: ansible.builtin.get_url
+    url: "{{ rv_apache_repo }}/dist/hive/hive-{{ rv_metastore_version }}/apache-hive-{{ rv_metastore_version }}-bin.tar.gz"
+    dest: "downloads/hive-{{ rv_metastore_version }}.tar.gz"
+    mode: '0755'
+  run_once: true
+  become: false
+
+- name: Create system user for metastore
+  ansible.builtin.user:
+    name: "{{ rv_metastore_owner }}"
+    shell: "/bin/false"
+    create_home: false
+  run_once: yes
+
+- name: Create Metastore home directory
+  ansible.builtin.file:
+    name: "{{ rv_metastore_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    
+- name: Create Metastore log directory
+  ansible.builtin.file:
+    name: "{{ rv_metastore_logs }}"
+    state: directory
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    mode: '0755'
+
+- name: Create Metastore config directory
+  ansible.builtin.file:
+    name: "{{ rv_metastore_conf }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create Metastore warehouse directory
+  ansible.builtin.file:
+    name: "{{ rv_metastore_warehouse_dir }}"
+    state: directory
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    mode: '0755'
+
+- name: Unarchive Metastore software
+  ansible.builtin.unarchive:
+    src: "downloads/hive-metastore-{{ rv_metastore_version }}-bin.tar.gz"
+    dest: "{{ rv_metastore_home }}"
+    creates: "{{ rv_metastore_home }}/apache-hive-metastore-{{ rv_metastore_version }}-bin"
+
+- name: Unarchive Hive
+  ansible.builtin.unarchive:
+    src: "downloads/hive-{{ rv_metastore_version }}.tar.gz"
+    include: "apache-hive-{{ rv_metastore_version }}-bin/lib/hive-exec-{{ rv_metastore_version }}.jar"
+    dest: "{{ rv_metastore_home }}/apache-hive-metastore-{{ rv_metastore_version }}-bin/lib"
+    creates: "{{ rv_metastore_home }}/apache-hive-metastore-{{ rv_metastore_version }}-bin/lib/hive-exec-{{ rv_metastore_version }}.jar"
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    extra_opts:  [--strip-components=2]
+    
+- name: Create symlink to Metastore latest folder
+  ansible.builtin.file:
+    dest: "{{ rv_metastore_home_latest }}"
+    src: "{{ rv_metastore_home }}/apache-hive-metastore-{{ rv_metastore_version }}-bin"
+    state: link
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    
+- name: Download MySQL Java connector
+  local_action:
+    module: ansible.builtin.get_url
+    url: "https://downloads.mariadb.com/Connectors/java/connector-java-{{ rv_mysql_connector_version }}/mariadb-java-client-{{ rv_mysql_connector_version }}.jar"
+    dest: "downloads/"
+    mode: '0644'
+  run_once: true
+  become: false
+  
+- name: Copy MySQL Java connector to proper location
+  ansible.builtin.copy:
+    src: "downloads/mariadb-java-client-{{ rv_mysql_connector_version }}.jar"
+    dest: "{{ rv_metastore_home_latest }}/lib"
+
+- name: Set Metastore software ownership
+  ansible.builtin.file:
+    path: "{{ rv_metastore_home }}/apache-hive-metastore-{{ rv_metastore_version }}-bin"
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    recurse: yes
+
+- name: Install PyMySQL
+  ansible.builtin.apt:
+    name: "python3-pymysql"
+    update_cache: yes
+
+- name: Create metastore database
+  community.mysql.mysql_db:
+    name: "metastore"
+    login_host: "{{ rv_mysql_host }}"
+    login_user: "{{ gv_hmsdb_user }}"
+    login_password: "{{ gv_hmsdb_password }}"
+    state: present
+    
+- name: Create metastore-log4j2.properties (logs config) from template
+  ansible.builtin.template:
+    src: "metastore-log4j2.properties.j2"
+    dest: "{{ rv_metastore_conf }}/metastore-log4j2.properties"
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+
+- name: Create metastore-site.xml from template
+  ansible.builtin.template:
+    src: "metastore-site.xml.j2"
+    dest: "{{ rv_metastore_conf }}/metastore-site.xml"
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    mode: '0755'
+
+- name: Create core-site.xml from template
+  ansible.builtin.template:
+    src: "core-site.xml.j2"
+    dest: "{{ rv_metastore_conf }}/core-site.xml"
+    owner: "{{ rv_metastore_owner }}"
+    group: "{{ rv_metastore_owner }}"
+    mode: '0755'
+
+- name: Create metastore.env file
+  ansible.builtin.template:
+    src: metastore.env.j2
+    dest: "{{ rv_metastore_conf }}/metastore.env"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Init Metastore schema
+  shell: "{{ rv_metastore_home_latest }}/bin/schematool -dbType mysql -initSchema"
+  register: output
+  failed_when: 
+    - output.rc != 0
+    - output.stderr is not regex("Table '\w+' already exists")
+  changed_when: 
+    - "'Initialization script completed' in output.stdout"
+  environment:
+    HADOOP_HOME: "{{ rv_hadoop_home_latest }}"
+    METASTORE_CONF_DIR: "{{ rv_metastore_conf }}"
+    JAVA_HOME: "{{ grv_baseos_client_config.java_home }}"
+
+- name: Create metastore.service file
+  ansible.builtin.template:
+    src: metastore.service.j2
+    dest: "/etc/systemd/system/metastore.service"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable Hive Metastore service
+  ansible.builtin.systemd:
+    name: metastore
+    state: started
+    enabled: yes
