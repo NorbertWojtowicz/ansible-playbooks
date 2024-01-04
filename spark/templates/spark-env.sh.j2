@@ -1,0 +1,16 @@
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export JAVA_TOOL_OPTS=-Djava.net.preferIPv4Stack=true
+JDK_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED --add"
+
+SPARK_MASTER_HOST={{ groups['sparkmaster'][0] }}
+SPARK_MASTER_PORT={{ rv_spark_master_port }}
+SPARK_WORKER_PORT={{ rv_spark_worker_port }}
+SPARK_MASTER_WEBUI_PORT={{ rv_spark_master_web_port }}
+SPARK_WORKER_WEBUI_PORT={{ rv_spark_worker_web_port }}
+SPARK_WORKER_CORES={{ rv_spark_worker_cores }}
+SPARK_WORKER_MEMORY={{ rv_spark_worker_memory }}
+SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.appDataTtl=86400"
+SPARK_WORKER_DIR={{ rv_spark_stage_directory }}
+SPARK_CONF_DIR={{ rv_spark_config }}
+SPARK_HOME={{ rv_spark_home_latest }}
+SPARK_LOG_DIR={{ rv_spark_log_dir }}

@@ -1,0 +1,22 @@
+[Unit]
+Description=Spark
+After=network.target
+After=systemd-user-session.Service
+After=network-online.target
+
+[Service]
+Type=forking
+PIDFILE=/tmp/spark.PID
+User=root
+Group=root
+ExecStart={{ rv_spark_home_latest }}/sbin/start-all.sh
+ExecStartPost={{ rv_spark_home_latest }}/sbin/start-history-server.sh
+ExecStop={{ rv_spark_home_latest }}/sbin/stop-all.sh
+ExecStopPost={{ rv_spark_home_latest }}/sbin/stop-history-server.sh
+Restart=on-failure
+RestartSec=30
+StartLimitInterval=350
+StartLimitBurst=10
+
+[Install]
+WantedBy=multi-user.target
