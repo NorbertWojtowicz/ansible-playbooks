@@ -1,8 +1,8 @@
 - name: Download Spark software
   local_action:
     module: ansible.builtin.get_url
-    url: "{{ rv_spark_download_url }}/spark-{{ rv_spark_version }}-bin-hadoop3.tgz"
-    dest: "downloads/spark-{{ rv_spark_version }}-bin.tgz"
+    url: "{{ rv_spark_download_url }}/spark-{{ rv_spark_version }}/spark-{{ rv_spark_version }}-bin-hadoop3.tgz"
+    dest: "./spark-{{ rv_spark_version }}-bin.tgz"
     mode: '0644'
   run_once: true
   become: false
@@ -22,3 +22,85 @@
     owner: root
     group: root
     mode: '0777'
+
+- name: Create Spark log/history directory
+  ansible.builtin.file:
+    path: "{{ rv_spark_log_dir }}/spark-events"
+    state: directory
+    owner: root
+    group: root
+    mode: '0777'
+
+- name: Create Spark security config directory
+  ansible.builtin.file:
+    path: "{{ rv_spark_security_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0777'
+
+- name: Create Spark stage directory
+  ansible.builtin.file:
+    path: "{{ rv_spark_stage_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0777'
+
+- name: Unarchive Spark software
+  ansible.builtin.unarchive:
+    src: "./spark-{{ rv_spark_version }}-bin.tgz"
+    dest: "{{ rv_spark_home }}"
+    creates: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ rv_hadoop_version }}"
+
+- name: Create symlink to latest folder
+  ansible.builtin.file:
+    dest: "{{ rv_spark_home_latest }}"
+    src: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ rv_hadoop_version }}"
+    state: link
+    owner: root
+    group: root
+
+- name: Create spark-env from template
+  ansible.builtin.template:
+    src: "spark-env.sh.j2"
+    dest: "{{ rv_spark_config }}/spark-env.sh"
+
+- name: Create spark-defaults.conf from template
+  ansible.builtin.template:
+    src: "spark-defaults.conf.j2"
+    dest: "{{ rv_spark_config }}/spark-defaults.conf"
+
+# May be uncommented in the future
+# - name: Create core-site.xml from template
+#   ansible.builtin.template:
+#     src: "core-site.xml.j2"
+#     dest: "{{ rv_spark_config }}/core-site.xml"
+
+# - name: Create yarn-site.xml from template
+#   ansible.builtin.template:
+#     src: "yarn-site.xml.j2"
+#     dest: "{{ rv_spark_config }}/yarn-site.xml"
+
+# - name: Create log4j2.properties from template
+#   ansible.builtin.template:
+#     src: "log4j2.properties.j2"
+#     dest: "{{ rv_spark_config }}/log4j2.properties"
+
+- name: Change default spark conf dir
+  ansible.builtin.lineinfile:
+    path: "{{ rv_spark_home_latest }}/sbin/spark-config.sh"
+    regexp: '^export SPARK_CONF_DIR="{{ rv_spark_config }}"'
+    line: 'export SPARK_CONF_DIR="{{ rv_spark_config }}"'
+
+- name: Set spark home systemwide
+  copy:
+    content: |
+      # Set spark environment variables
+      export SPARK_HOME={{ rv_spark_home_latest }}
+      export SPARK_CONF_DIR={{ rv_spark_config }}
+      export PATH={{ rv_spark_home_latest }}/bin:$PATH
+    dest: "/etc/profile.d/spark-profile.sh"
+    mode: '0644'
+    owner: root
+    group: root
