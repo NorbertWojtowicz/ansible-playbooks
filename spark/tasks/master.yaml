@@ -5,7 +5,7 @@
     name: spark
     state: stopped
     enabled: yes
-    deamon_reload: true
+    daemon_reload: true
   ignore_errors: true
 
 - name: Create workers file from template
@@ -26,4 +26,4 @@
     name: spark
     state: restarted
     enabled: yes
-    domain_reload: true
+    daemon_reload: true
