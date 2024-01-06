@@ -1,7 +1,10 @@
 ---
-- name: Install and configure Apache Spark
-  hosts: sparkmaster
+- name: Install and configure Apache Spark on worker nodes
+  hosts: sparkworker
   become: yes
+  tags:
+    - sparkworker
+    - spark
 
   tasks:
     - include_role:
@@ -9,3 +12,22 @@
         
     - include_role:
         name: spark
+      vars:
+        rv_hadoop_version: "{{ gv_hadoop_version }}"
+
+- name: Install and configure Apache Spark on master node
+  hosts: sparkmaster
+  become: yes
+  tags:
+    - sparkmaster
+    - spark
+
+  tasks:
+    - include_role:
+        name: os-setup
+        
+    - include_role:
+        name: spark
+        tasks_from: master
+      vars:
+        rv_hadoop_version: "{{ gv_hadoop_version }}"
