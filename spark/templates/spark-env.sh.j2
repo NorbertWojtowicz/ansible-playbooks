@@ -1,6 +1,6 @@
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 export JAVA_TOOL_OPTS=-Djava.net.preferIPv4Stack=true
-JDK_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED --add"
+JDK_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED"
 
 SPARK_MASTER_HOST={{ groups['sparkmaster'][0] }}
 SPARK_MASTER_PORT={{ rv_spark_master_port }}
