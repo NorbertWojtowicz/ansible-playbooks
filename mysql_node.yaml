@@ -1,8 +1,0 @@
----
-- name: Install and configure MySQL
-  hosts: mysql
-  become: yes
-
-  tasks:
-    - include_role:
-        name: mysql

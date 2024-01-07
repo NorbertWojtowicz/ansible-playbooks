@@ -6,4 +6,14 @@ gv_airflow_version: 2.5.3
 # --------------------------------
 # Global Hadoop settings
 # --------------------------------
-gv_hadoop_version: 3
+gv_hadoop_version: 3.2.0
+
+# --------------------------------
+# Global Hive Metastore settings
+# --------------------------------
+gv_metastore_version: 3.0.0
+
+# --------------------------------
+# Global Java settings
+# --------------------------------
+gv_jdk_version: openjdk-17-jdk

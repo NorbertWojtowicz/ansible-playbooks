@@ -1,0 +1,82 @@
+---
+- name: Install and configure Apache Airflow
+  hosts: airflow
+  become: yes
+  tags:
+    - airflow
+
+  tasks:
+    - include_role:
+        name: os-setup
+        
+    - include_role:
+        name: airflow
+      vars:
+        rv_airflow_version: "{{ gv_airflow_version }}"
+        rv_mysql_host: "{{ groups.mysql | first }}"
+        rv_spark_master_host: "{{ groups.sparkmaster | first }}"
+
+- name: Install and configure Hive metastore (with hadoop binaries)
+  hosts: metastore
+  become: yes
+  tags:
+    - hive-metastore
+
+  tasks:
+    - include_role:
+        name: os-setup
+
+    - include_role:
+        name: hadoop
+      vars:
+        rv_hadoop_version: "{{ gv_hadoop_version }}"
+
+    - include_role:
+        name: hive-metastore
+      vars:
+        rv_metastore_version: "{{ gv_metastore_version }}"
+        rv_hadoop_version: "{{ gv_hadoop_version }}"
+        rv_mysql_host: "{{ groups.mysql | first }}"
+
+- name: Install and configure MySQL
+  hosts: mysql
+  become: yes
+  tags:
+    - mysql
+
+  tasks:
+    - include_role:
+        name: mysql
+
+- name: Install and configure Apache Spark on worker nodes
+  hosts: sparkworker
+  become: yes
+  tags:
+    - sparkworker
+    - spark
+
+  tasks:
+    - include_role:
+        name: os-setup
+        
+    - include_role:
+        name: spark
+      vars:
+        rv_hadoop_version: "{{ gv_hadoop_version }}"
+
+- name: Install and configure Apache Spark on master node
+  hosts: sparkmaster
+  become: yes
+  tags:
+    - sparkmaster
+    - spark
+
+  tasks:
+    - include_role:
+        name: os-setup
+        
+    - include_role:
+        name: spark
+        tasks_from: master
+      vars:
+        rv_hadoop_version: "{{ gv_hadoop_version }}"

@@ -1,0 +1,15 @@
+---
+rv_apache_repo: "https://archive.apache.org"
+rv_home_path: /opt/apache
+rv_hadoop_home: "{{ rv_home_path }}/hadoop"
+rv_hadoop_home_latest: "{{ rv_hadoop_home }}/hadoop-latest"
+rv_metastore_conf: "/etc/hive-metastore"
+rv_metastore_logs: "/var/log/metastore"
+rv_metastore_home: "{{ rv_home_path }}/hive-metastore"
+rv_metastore_home_latest: "{{ rv_metastore_home }}/apache-hive-metastore-latest"
+rv_metastore_warehouse_dir: "/var/hive-metastore/warehouse"
+
+rv_mysql_connector_version: 3.0.8
+rv_mysql_port: 3306
+rv_metastore_port: 9083
+rv_metastore_owner: metastore
