@@ -129,13 +129,14 @@
     group: "{{ rv_metastore_owner }}"
     mode: '0755'
 
-- name: Create core-site.xml from template
-  ansible.builtin.template:
-    src: "core-site.xml.j2"
-    dest: "{{ rv_metastore_conf }}/core-site.xml"
-    owner: "{{ rv_metastore_owner }}"
-    group: "{{ rv_metastore_owner }}"
-    mode: '0755'
+# May be uncommented in the future
+# - name: Create core-site.xml from template
+#   ansible.builtin.template:
+#     src: "core-site.xml.j2"
+#     dest: "{{ rv_metastore_conf }}/core-site.xml"
+#     owner: "{{ rv_metastore_owner }}"
+#     group: "{{ rv_metastore_owner }}"
+#     mode: '0755'
 
 - name: Create metastore.env file
   ansible.builtin.template:
@@ -156,7 +157,7 @@
   environment:
     HADOOP_HOME: "{{ rv_hadoop_home_latest }}"
     METASTORE_CONF_DIR: "{{ rv_metastore_conf }}"
-    JAVA_HOME: "{{ grv_baseos_client_config.java_home }}"
+    JAVA_HOME: "/usr/lib/jvm/java-17-openjdk-amd64"
 
 - name: Create metastore.service file
   ansible.builtin.template:
