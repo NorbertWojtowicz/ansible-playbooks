@@ -1,5 +1,4 @@
 ---
-# tasks file for mysql
 - name: Install MySQL and dependencies
   ansible.builtin.apt:
     name: "{{item}}"
@@ -34,6 +33,10 @@
     priv: "airflow.*:ALL,GRANT"
     state: present
 
-
-# TODO: Create MySQL service user
-
+- name: Create MySQL user for Hive Metastore
+  ansible.builtin.mysql_user:
+    name: "{{ gv_hmsdb_user }}"
+    password: "{{ gv_hmsdb_password }}"
+    host: "%"
+    priv: "metastore.*:ALL,GRANT"
+    state: present
