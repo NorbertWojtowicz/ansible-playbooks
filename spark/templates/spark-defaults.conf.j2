@@ -1,0 +1,10 @@
+spark.eventLog.enabled=true
+spark.eventLog.dir=file://{{ rv_spark_log_dir }}/spark-events
+spark.history.fs.logDirectory=file://{{ rv_spark_log_dir }}
+spark.conf.dir={{ rv_spark_config }}
+spark.driver.port={{ rv_spark_driver_port }}
+
+# Spark spill dir
+spark.local.dir={{ rv_spark_spill_directory }}
+
+spark.hadoop.hive.metastore.uris=thrift://{{ groups['hive-metastore'][0] }}
