@@ -6,3 +6,18 @@
 - name: Install pip
   ansible.builtin.apt:
     name: python3-pip
+
+- name: Install Java 17
+  ansible.builtin.apt:
+    name: openjdk-17-jdk
+    update_cache: yes
+
+- name: Set JAVA_HOME systemwide
+  copy:
+    content: |
+      # Set JAVA_HOME
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    dest: "/etc/profile.d/java-profile.sh"
+    mode: '0644'
+    owner: root
+    group: root

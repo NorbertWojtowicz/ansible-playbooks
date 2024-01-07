@@ -1,0 +1,19 @@
+rv_spark_home: "/opt/apache/spark"
+rv_spark_home_latest: "{{ rv_spark_home }}/spark-latest"
+rv_spark_config: "/etc/spark"
+rv_spark_download_url: "https://archive.apache.org/dist/spark"
+rv_spark_version: "3.5.0"
+rv_spark_security_config_dir: "{{ rv_spark_config }}/security"
+rv_spark_log_dir: "/var/log/spark"
+rv_spark_stage_dir: "/data/tmp/spark-stage"
+rv_spark_spill_directory: "/data/tmp/spark-stage"
+
+rv_spark_master_port: 7090
+rv_spark_worker_port: 65000
+rv_spark_master_web_port: 8085
+rv_spark_worker_web_port: 8085
+rv_spark_driver_port: 4040
+rv_spark_worker_cores: 2
+rv_spark_worker_memory: 1G
+rv_spark_stage_directory: /data/tmp/spark-stage
+

@@ -5,4 +5,16 @@
 10.143.73.246
 
 [sparkmaster]
-10.10.10.10
+10.143.73.184
+
+[sparkworker]
+10.143.73.80
+10.143.73.51
+10.143.73.81
+
+[spark:children]
+sparkmaster
+sparkworker
+
+[hive-metastore]
+10.143.73.x
