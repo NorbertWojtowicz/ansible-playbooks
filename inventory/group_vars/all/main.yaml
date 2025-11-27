@@ -17,3 +17,8 @@ gv_metastore_version: 3.0.0
 # Global Java settings
 # --------------------------------
 gv_jdk_version: openjdk-17-jdk
+
+# --------------------------------
+# Global Python interpreter
+# --------------------------------
+ansible_python_interpreter: /usr/bin/python3.10

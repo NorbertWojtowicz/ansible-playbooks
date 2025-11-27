@@ -9,11 +9,11 @@
     mode: '0755'
 
 - name: Download hadoop binaries
-  local_action:
-    module: ansible.builtin.get_url
+  ansible.builtin.get_url:
     url: "{{ rv_apache_repo }}/dist/hadoop/common/hadoop-{{ rv_hadoop_version }}/hadoop-{{ rv_hadoop_version }}.tar.gz"
     dest: "downloads/hadoop-{{ rv_hadoop_version }}.tar.gz"
     mode: '0644'
+  delegate_to: localhost
   run_once: true
   become: false
 

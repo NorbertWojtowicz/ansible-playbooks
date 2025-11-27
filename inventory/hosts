@@ -2,7 +2,7 @@
 10.167.190.196
 
 [airflow]
-10.143.73.246
+10.167.190.59
 
 [sparkmaster]
 10.143.73.184
@@ -16,5 +16,5 @@
 sparkmaster
 sparkworker
 
-[hive-metastore]
-10.143.73.x
+[metastore]
+10.167.190.85

@@ -1,19 +1,19 @@
 ---
 - name: Download Hive Metastore
-  local_action:
-    module: ansible.builtin.get_url
+  ansible.builtin.get_url:
     url: "{{ rv_apache_repo }}/dist/hive/hive-standalone-metastore-{{ rv_metastore_version }}/hive-standalone-metastore-{{ rv_metastore_version }}-bin.tar.gz"
     dest: "downloads/hive-metastore-{{ rv_metastore_version }}-bin.tar.gz"
     mode: '0644'
+  delegate_to: localhost
   run_once: true
   become: false
   
 - name: Download Hive for hive-exec.jar
-  local_action:
-    module: ansible.builtin.get_url
+  ansible.builtin.get_url:
     url: "{{ rv_apache_repo }}/dist/hive/hive-{{ rv_metastore_version }}/apache-hive-{{ rv_metastore_version }}-bin.tar.gz"
     dest: "downloads/hive-{{ rv_metastore_version }}.tar.gz"
     mode: '0755'
+  delegate_to: localhost
   run_once: true
   become: false
 
@@ -81,11 +81,11 @@
     group: "{{ rv_metastore_owner }}"
     
 - name: Download MySQL Java connector
-  local_action:
-    module: ansible.builtin.get_url
+  ansible.builtin.get_url:
     url: "https://downloads.mariadb.com/Connectors/java/connector-java-{{ rv_mysql_connector_version }}/mariadb-java-client-{{ rv_mysql_connector_version }}.jar"
     dest: "downloads/"
     mode: '0644'
+  delegate_to: localhost
   run_once: true
   become: false
   
