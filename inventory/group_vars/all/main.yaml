@@ -9,6 +9,11 @@ gv_airflow_version: 2.5.3
 gv_hadoop_version: 3.2.0
 
 # --------------------------------
+# Global Hadoop settings for Spark
+# --------------------------------
+gv_spark_hadoop_version: 3
+
+# --------------------------------
 # Global Hive Metastore settings
 # --------------------------------
 gv_metastore_version: 3.0.0

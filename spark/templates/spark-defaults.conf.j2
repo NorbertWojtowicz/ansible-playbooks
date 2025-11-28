@@ -7,4 +7,4 @@ spark.driver.port={{ rv_spark_driver_port }}
 # Spark spill dir
 spark.local.dir={{ rv_spark_spill_directory }}
 
-spark.hadoop.hive.metastore.uris=thrift://{{ groups['hive-metastore'][0] }}
+spark.hadoop.hive.metastore.uris=thrift://{{ groups['metastore'][0] }}

@@ -79,4 +79,4 @@
         name: spark
         tasks_from: master
       vars:
-        rv_hadoop_version: "{{ gv_hadoop_version }}"
+        rv_spark_hadoop_version: "{{ gv_spark_hadoop_version }}"

@@ -1,9 +1,9 @@
 - name: Download Spark software
-  local_action:
-    module: ansible.builtin.get_url
+  ansible.builtin.get_url:
     url: "{{ rv_spark_download_url }}/spark-{{ rv_spark_version }}/spark-{{ rv_spark_version }}-bin-hadoop3.tgz"
     dest: "./spark-{{ rv_spark_version }}-bin.tgz"
     mode: '0644'
+  delegate_to: localhost
   run_once: true
   become: false
 
@@ -51,12 +51,12 @@
   ansible.builtin.unarchive:
     src: "./spark-{{ rv_spark_version }}-bin.tgz"
     dest: "{{ rv_spark_home }}"
-    creates: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ rv_hadoop_version }}"
+    creates: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ gv_spark_hadoop_version }}"
 
 - name: Create symlink to latest folder
   ansible.builtin.file:
     dest: "{{ rv_spark_home_latest }}"
-    src: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ rv_hadoop_version }}"
+    src: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ gv_spark_hadoop_version }}"
     state: link
     owner: root
     group: root
