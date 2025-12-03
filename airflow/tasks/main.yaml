@@ -37,6 +37,14 @@
     group: root
     mode: '0755'
 
+- name: Create /run/airflow directory for PID files
+  ansible.builtin.file:
+    path: "/run/airflow"
+    state: directory
+    owner: "{{ rv_airflow_owner }}"
+    group: "{{ rv_airflow_owner }}"
+    mode: '0755'
+
 - name: Set Airflow home directory ownership
   ansible.builtin.file:
     path: "{{ rv_airflow_home }}"
@@ -85,6 +93,15 @@
   ansible.builtin.apt:
     name: libmysqlclient-dev
     update_cache: yes
+
+- name: Install pkg-config utility
+  ansible.builtin.apt:
+    name: pkg-config
+
+- name: Install PyMySQL connector
+  ansible.builtin.pip:
+    name: pymysql
+    state: present
 
 - name: "Install airflow mysql provider"
   ansible.builtin.pip:
@@ -176,6 +193,7 @@
     name: scheduler
     state: started
     enabled: yes
+
 - name: Create webserver.service file
   ansible.builtin.template:
     src: webserver.service.j2
