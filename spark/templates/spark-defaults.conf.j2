@@ -3,8 +3,15 @@ spark.eventLog.dir=file://{{ rv_spark_log_dir }}/spark-events
 spark.history.fs.logDirectory=file://{{ rv_spark_log_dir }}
 spark.conf.dir={{ rv_spark_config }}
 spark.driver.port={{ rv_spark_driver_port }}
+spark.ui.port={{ rv_spark_ui_port }}
 
 # Spark spill dir
 spark.local.dir={{ rv_spark_spill_directory }}
 
-spark.hadoop.hive.metastore.uris=thrift://{{ groups['hive-metastore'][0] }}
+spark.hadoop.hive.metastore.uris=thrift://{{ groups['metastore'][0] }}
+
+# MinIO configuration
+spark.hadoop.fs.s3a.endpoint=http://10.167.190.248:9000
+spark.hadoop.fs.s3a.access.key=admin
+spark.hadoop.fs.s3a.secret.key=password123
+spark.hadoop.fs.s3a.path.style.access=true

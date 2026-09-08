@@ -1,9 +1,9 @@
 - name: Download Spark software
-  local_action:
-    module: ansible.builtin.get_url
+  ansible.builtin.get_url:
     url: "{{ rv_spark_download_url }}/spark-{{ rv_spark_version }}/spark-{{ rv_spark_version }}-bin-hadoop3.tgz"
     dest: "./spark-{{ rv_spark_version }}-bin.tgz"
     mode: '0644'
+  delegate_to: localhost
   run_once: true
   become: false
 
@@ -51,12 +51,12 @@
   ansible.builtin.unarchive:
     src: "./spark-{{ rv_spark_version }}-bin.tgz"
     dest: "{{ rv_spark_home }}"
-    creates: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ rv_hadoop_version }}"
+    creates: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ gv_spark_hadoop_version }}"
 
 - name: Create symlink to latest folder
   ansible.builtin.file:
     dest: "{{ rv_spark_home_latest }}"
-    src: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ rv_hadoop_version }}"
+    src: "{{ rv_spark_home }}/spark-{{ rv_spark_version }}-bin-hadoop{{ gv_spark_hadoop_version }}"
     state: link
     owner: root
     group: root
@@ -70,6 +70,11 @@
   ansible.builtin.template:
     src: "spark-defaults.conf.j2"
     dest: "{{ rv_spark_config }}/spark-defaults.conf"
+
+- name: Create metrics.properties from template
+  ansible.builtin.template:
+    src: "metrics.properties.j2"
+    dest: "{{ rv_spark_config }}/metrics.properties"
 
 # May be uncommented in the future
 # - name: Create core-site.xml from template
@@ -86,6 +91,51 @@
 #   ansible.builtin.template:
 #     src: "log4j2.properties.j2"
 #     dest: "{{ rv_spark_config }}/log4j2.properties"
+
+- name: Download required JAR dependencies to Spark cluster
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ rv_spark_home_latest }}/jars/{{ item.filename }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    # Spark Core & SQL
+    - url: "https://repo1.maven.org/maven2/org/apache/spark/spark-core_2.13/4.0.0/spark-core_2.13-4.0.0.jar"
+      filename: "spark-core_2.13-4.0.0.jar"
+    - url: "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.13/4.0.0/spark-sql_2.13-4.0.0.jar"
+      filename: "spark-sql_2.13-4.0.0.jar"
+
+    # Iceberg Runtime
+    - url: "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-4.0_2.13/1.10.1/iceberg-spark-runtime-4.0_2.13-1.10.1.jar"
+      filename: "iceberg-spark-runtime-4.0_2.13-1.10.1.jar"
+
+    # Hadoop AWS & Common
+    - url: "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.1/hadoop-aws-3.4.1.jar"
+      filename: "hadoop-aws-3.4.1.jar"
+    - url: "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.1/hadoop-common-3.4.1.jar"
+      filename: "hadoop-common-3.4.1.jar"
+#    - url: "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.367/aws-java-sdk-bundle-1.12.367.jar"
+#      filename: "aws-java-sdk-bundle-1.12.367.jar"
+    - url: "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.47.0/bundle-2.47.0.jar"
+      filename: "bundle-2.47.0.jar"
+    - url: "https://repo1.maven.org/maven2/org/apache/spark/spark-hadoop-cloud_2.13/4.0.0/spark-hadoop-cloud_2.13-4.0.0.jar"
+      filename: "spark-hadoop-cloud_2.13-4.0.0.jar"
+    - url: "https://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.23.0/libthrift-0.23.0.jar"
+      filename: "libthrift-0.23.0.jar"
+
+    # Woodstox for hadoop-common
+    - url: "https://repo1.maven.org/maven2/com/fasterxml/woodstox/woodstox-core/5.4.0/woodstox-core-5.4.0.jar"
+      filename: "woodstox-core-5.4.0.jar"
+    - url: "https://repo1.maven.org/maven2/org/codehaus/woodstox/stax2-api/4.2.1/stax2-api-4.2.1.jar"
+      filename: "stax2-api-4.2.1.jar"
+
+    # Required by hadoop-common for Configuration parsing
+    - url: "https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.10.1/commons-configuration2-2.10.1.jar"
+      filename: "commons-configuration2-2.10.1.jar"
+
+    - url: "https://repo1.maven.org/maven2/com/google/re2j/re2j/1.1/re2j-1.1.jar"
+      filename: "re2j-1.1.jar"
 
 - name: Change default spark conf dir
   ansible.builtin.lineinfile:
