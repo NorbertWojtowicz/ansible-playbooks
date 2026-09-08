@@ -7,7 +7,7 @@ rv_metastore_conf: "/etc/hive-metastore"
 rv_metastore_logs: "/var/log/metastore"
 rv_metastore_home: "{{ rv_home_path }}/hive-metastore"
 rv_metastore_home_latest: "{{ rv_metastore_home }}/apache-hive-metastore-latest"
-rv_metastore_warehouse_dir: "/var/hive-metastore/warehouse"
+rv_metastore_warehouse_dir: "s3a://ecommerce-warehouse/"
 
 rv_mysql_connector_version: 3.0.8
 rv_mysql_port: 3306

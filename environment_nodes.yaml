@@ -80,3 +80,20 @@
         tasks_from: master
       vars:
         rv_spark_hadoop_version: "{{ gv_spark_hadoop_version }}"
+
+- name: Install and configure Grafana & Prometheus
+  hosts: grafana
+  become: yes
+  tags:
+    - grafana
+
+  tasks:
+    - include_role:
+        name: os-setup
+
+    - include_role:
+        name: grafana
+      vars:
+        rv_airflow_version: "{{ gv_airflow_version }}"
+        rv_mysql_host: "{{ groups.mysql | first }}"
+        rv_spark_master_host: "{{ groups.sparkmaster | first }}"

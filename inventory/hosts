@@ -19,3 +19,6 @@ sparkworker
 
 [metastore]
 10.167.190.85
+
+[grafana]
+10.167.190.86
